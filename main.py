@@ -1,8 +1,9 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import pyqtSlot, Qt, QPoint, QRect
-from PyQt5.QtGui import QIcon, QBitmap, QFont
+from PyQt5.QtCore import pyqtSlot, Qt, QPoint, QSize
+from PyQt5.QtGui import QFont, QCursor
 import sys
 import json
+import qtawesome as qta
 
 
 class App(QMainWindow):
@@ -36,8 +37,8 @@ class App(QMainWindow):
         self.fontAction = QAction('Font...')
 
         self.close_btn = QPushButton(self.menuBar)
-        self.max_btn = QPushButton("", self.menuBar)
-        self.min_btn = QPushButton("_", self.menuBar)
+        self.max_btn = QPushButton(self.menuBar)
+        self.min_btn = QPushButton(self.menuBar)
 
         self.oldPos = self.pos()
         self.screen = app.desktop()
@@ -86,7 +87,7 @@ class App(QMainWindow):
 
         self.setStyleSheet('background-color: #333333; border: 2px solid #333333;')
 
-        self.menuBar.setStyleSheet('color: #00cc99; font-size: 16px;')
+        self.menuBar.setStyleSheet('color: #55D6BE; font-size: 20px;')
 
         self.newProjectAction.setShortcut('Ctrl+Shift+N')
         self.fileMenu.addAction(self.newProjectAction)
@@ -124,14 +125,22 @@ class App(QMainWindow):
         self.windowControlLayout.addWidget(self.max_btn)
         self.windowControlLayout.addWidget(self.close_btn)
 
-        self.min_btn.setStyleSheet("width: 20px; height:20px;")
+        self.min_btn.setStyleSheet("width: 30px; height:20px; border: none;")
+        self.min_btn.setIcon(qta.icon('fa5s.window-minimize', color="#55D6BE"))
+        self.min_btn.setIconSize(QSize(20, 20))
+        self.min_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.min_btn.clicked.connect(self.minButton)
 
-        self.max_btn.setStyleSheet("width: 20px; height:20px;")
+        self.max_btn.setStyleSheet("width: 30px; height:20px; border: none;")
+        self.max_btn.setIcon(qta.icon('fa5s.window-maximize', color="#55D6BE"))
+        self.max_btn.setIconSize(QSize(20, 20))
+        self.max_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.max_btn.clicked.connect(self.maxButton)
 
-        self.close_btn.setIcon(self.style().standardIcon(getattr(QStyle, 'SP_MessageBoxCritical')))
-        self.close_btn.setStyleSheet("width: 20px; height:20px;")
+        self.close_btn.setStyleSheet("width: 30px; height:20px; border: none;")
+        self.close_btn.setIcon(qta.icon('fa5s.times', color="#55D6BE"))
+        self.close_btn.setIconSize(QSize(20, 20))
+        self.close_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.close_btn.clicked.connect(self.closeButton)
 
         self.setWindowFlags(Qt.FramelessWindowHint)
