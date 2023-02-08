@@ -1,3 +1,5 @@
+import os
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import pyqtSlot, Qt, QPoint, QSize
 from PyQt5.QtGui import QFont, QCursor
@@ -218,7 +220,7 @@ class App(QMainWindow):
 
     def openFile(self):
         fname = QFileDialog.getOpenFileName(self, 'Open file',
-                                            'C:\\Users\\Brian Smith\\Documents', "Text files (*.txt)")
+                                            os.path.join(os.path.expanduser('~'), 'Documents'), "Text files (*.txt)")
         with open(fname[0], 'r') as f:
             file = f.read()
             self.textEdit.setPlainText(file)
@@ -264,3 +266,4 @@ if __name__ == '__main__':
     app.setStyle('Fusion')
     ex = App()
     sys.exit(app.exec_())
+
