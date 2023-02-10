@@ -41,9 +41,23 @@ class App(QMainWindow):
         self.exitAction = QAction('Exit', self)
 
         self.editMenu = self.menuBar.addMenu('&Edit')
-
-        self.formatMenu = self.menuBar.addMenu('Format')
+        self.undoAction = QAction('Undo')
+        self.cutAction = QAction('Cut')
+        self.copyAction = QAction('Copy')
+        self.pasteAction = QAction('Paste')
+        self.deleteAction = QAction('Delete')
+        self.findAction = QAction('Find')
+        self.findNextAction = QAction('Find next')
+        self.findPrevAction = QAction('Find previous')
+        self.replaceAction = QAction('Replace')
+        self.goToAction = QAction('Go to')
+        self.selectAllAction = QAction('Select all')
         self.fontAction = QAction('Font')
+
+        self.viewMenu = self.menuBar.addMenu('View')
+        self.zoomAction = QAction('Zoom')
+        self.statusBarAction = QAction('Status bar')
+        self.wordWrapAction = QAction('Word wrap')
 
         self.close_btn = QPushButton(self.menuBar)
         self.max_btn = QPushButton(self.menuBar)
@@ -113,13 +127,60 @@ class App(QMainWindow):
         self.exitAction.triggered.connect(qApp.quit)
         self.fileMenu.addAction(self.exitAction)
 
+        self.undoAction.setShortcut('Ctrl+Z')
+        self.editMenu.addAction(self.undoAction)
+
+        self.editMenu.addSeparator()
+
+        self.cutAction.setShortcut('Ctrl+X')
+        self.editMenu.addAction(self.cutAction)
+
+        self.copyAction.setShortcut('Ctrl+C')
+        self.editMenu.addAction(self.copyAction)
+
+        self.pasteAction.setShortcut('Ctrl+V')
+        self.editMenu.addAction(self.pasteAction)
+
+        self.deleteAction.setShortcut('Del')
+        self.editMenu.addAction(self.deleteAction)
+
+        self.editMenu.addSeparator()
+
+        self.findAction.setShortcut('Ctrl+F')
+        self.editMenu.addAction(self.findAction)
+
+        self.findNextAction.setShortcut('F3')
+        self.editMenu.addAction(self.findNextAction)
+
+        self.findPrevAction.setShortcut('Shift+F3')
+        self.editMenu.addAction(self.findPrevAction)
+
+        self.replaceAction.setShortcut('Ctrl+H')
+        self.editMenu.addAction(self.replaceAction)
+
+        self.goToAction.setShortcut('Ctrl+G')
+        self.editMenu.addAction(self.goToAction)
+
+        self.editMenu.addSeparator()
+
+        self.selectAllAction.setShortcut('Ctrl+A')
+        self.editMenu.addAction(self.selectAllAction)
+
+        self.editMenu.addSeparator()
+
         self.fontAction.triggered.connect(self.openFont)
-        self.formatMenu.addAction(self.fontAction)
+        self.editMenu.addAction(self.fontAction)
+
+        self.viewMenu.addAction(self.zoomAction)
+
+        self.viewMenu.addAction(self.statusBarAction)
+
+        self.viewMenu.addAction(self.wordWrapAction)
 
         self.menuBar.setCornerWidget(self.windowControl, Qt.TopRightCorner)
-        self.windowControlLayout.addWidget(self.min_btn)
-        self.windowControlLayout.addWidget(self.max_btn)
-        self.windowControlLayout.addWidget(self.close_btn)
+        self.windowControlLayout.addWidget(self.min_btn, alignment=Qt.AlignLeft)
+        self.windowControlLayout.addWidget(self.max_btn, alignment=Qt.AlignCenter)
+        self.windowControlLayout.addWidget(self.close_btn, alignment=Qt.AlignRight)
 
         self.min_btn.setStyleSheet("width: 30px; height:20px; border: none;")
         self.min_btn.setIcon(qta.icon('fa5s.window-minimize', color="#444444"))
