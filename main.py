@@ -176,7 +176,7 @@ class App(QMainWindow):
             self.textEdit.document().print_(dialog.printer())
 
     def openFont(self):
-        font, ok = QFontDialog.getFont(self)
+        font, ok = QFontDialog.getFont()
         if ok:
             self.textEdit.setFont(font)
 
