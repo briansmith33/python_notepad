@@ -1,0 +1,12 @@
+QScrollBar {
+    background : #eeeeee; border:none;
+}
+QScrollBar::handle {
+    background: #333333; margin: 12px 0px; padding: 12px 0px;
+}
+QScrollBar::handle::pressed {
+    background : #666666;
+}
+QScrollBar::button {
+    border: none;
+}

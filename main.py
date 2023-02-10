@@ -3,6 +3,7 @@ import os
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import pyqtSlot, Qt, QPoint, QSize
 from PyQt5.QtGui import QFont, QCursor
+from PyQt5.QtPrintSupport import QPrintDialog
 import sys
 import json
 import qtawesome as qta
@@ -18,6 +19,12 @@ class App(QMainWindow):
         self.windowControl.setLayout(self.windowControlLayout)
 
         self.title = "Text Editor"
+        self.currentFile = None
+        self.setObjectName('MainWindow')
+        self.setWindowTitle(self.title)
+        self.defaultHeight = 600
+        self.defaultWidth = 900
+        self.resize(self.defaultWidth, self.defaultHeight)
         self.menuBar = self.menuBar()
         self.statusBar = self.statusBar()
         self.statusBar.showMessage('Message in statusbar.')
@@ -25,18 +32,18 @@ class App(QMainWindow):
         self.setStatusBar(self.statusBar)
 
         self.fileMenu = self.menuBar.addMenu('&File')
-        self.newProjectAction = QAction('New Project...')
-        self.newAction = QAction('&New...')
-        self.openAction = QAction('&Open...')
+        self.newWindowAction = QAction('New Window')
+        self.newAction = QAction('&New')
+        self.openAction = QAction('&Open')
         self.saveAction = QAction('&Save')
-        self.saveAsAction = QAction('Save as...')
-        self.printAction = QAction('&Print...')
+        self.saveAsAction = QAction('Save as')
+        self.printAction = QAction('&Print')
         self.exitAction = QAction('Exit', self)
 
         self.editMenu = self.menuBar.addMenu('&Edit')
 
         self.formatMenu = self.menuBar.addMenu('Format')
-        self.fontAction = QAction('Font...')
+        self.fontAction = QAction('Font')
 
         self.close_btn = QPushButton(self.menuBar)
         self.max_btn = QPushButton(self.menuBar)
@@ -56,24 +63,10 @@ class App(QMainWindow):
         self.editorLayout = QVBoxLayout(self)
         self.mainFrame.setLayout(self.editorLayout)
         self.textEdit = QPlainTextEdit(self)
-        self.textEdit.setStyleSheet("background-color: #eeeeee; font-size: 16px; padding: 20px; ")
+        self.textEdit.setStyleSheet("background-color: #eeeeee; font-size: 16px; padding: 20px; border: 1px solid #bbbbbb;")
         self.scrollBar = QScrollBar(self)
-        self.scrollBar.setStyleSheet("QScrollBar"
-                             "{"
-                             "background : #eeeeee; border:none;"
-                             "}"
-                             "QScrollBar::handle"
-                             "{"
-                             "background : #333333; margin: 12px 0px; padding: 12px 0px;"
-                             "}"
-                             "QScrollBar::handle::pressed"
-                             "{"
-                             "background : #666666;"
-                             "}"
-                             "QScrollBar::button"
-                             "{"
-                             "border: none;"
-                             "}")
+        with open('scrollbar.qss', 'r') as f:
+            self.scrollBar.setStyleSheet(f.read())
         self.textEdit.setVerticalScrollBar(self.scrollBar)
         self.editorLayout.addWidget(self.textEdit)
 
@@ -82,20 +75,18 @@ class App(QMainWindow):
         self.initUI()
 
     def initUI(self):
-        self.setObjectName('MainWindow')
-        self.setWindowTitle(self.title)
-        self.resize(640, 480)
+
         self.menuBar.setMouseTracking(True)
 
-        self.setStyleSheet('background-color: #333333; border: 2px solid #333333;')
-
-        self.menuBar.setStyleSheet('color: #55D6BE; font-size: 20px;')
-
-        self.newProjectAction.setShortcut('Ctrl+Shift+N')
-        self.fileMenu.addAction(self.newProjectAction)
+        self.setStyleSheet('background-color: #cccccc; border: 2px solid #cccccc;')
+        with open('menubar.qss', 'r') as f:
+            self.menuBar.setStyleSheet(f.read())
 
         self.newAction.setShortcut('Ctrl+N')
         self.fileMenu.addAction(self.newAction)
+
+        self.newWindowAction.setShortcut('Ctrl+Shift+N')
+        self.fileMenu.addAction(self.newWindowAction)
 
         self.openAction.setShortcut('Ctrl+O')
         self.openAction.triggered.connect(self.openFile)
@@ -104,12 +95,15 @@ class App(QMainWindow):
         self.fileMenu.addSeparator()
 
         self.saveAction.setShortcut('Ctrl+S')
+        self.saveAction.triggered.connect(self.save)
         self.fileMenu.addAction(self.saveAction)
 
         self.saveAsAction.setShortcut('Ctrl+Shift+S')
+        self.saveAsAction.triggered.connect(self.saveAs)
         self.fileMenu.addAction(self.saveAsAction)
 
         self.printAction.setShortcut('Ctrl+P')
+        self.printAction.triggered.connect(self.print)
         self.fileMenu.addAction(self.printAction)
 
         self.fileMenu.addSeparator()
@@ -128,19 +122,19 @@ class App(QMainWindow):
         self.windowControlLayout.addWidget(self.close_btn)
 
         self.min_btn.setStyleSheet("width: 30px; height:20px; border: none;")
-        self.min_btn.setIcon(qta.icon('fa5s.window-minimize', color="#55D6BE"))
+        self.min_btn.setIcon(qta.icon('fa5s.window-minimize', color="#444444"))
         self.min_btn.setIconSize(QSize(20, 20))
         self.min_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.min_btn.clicked.connect(self.minButton)
 
         self.max_btn.setStyleSheet("width: 30px; height:20px; border: none;")
-        self.max_btn.setIcon(qta.icon('fa5s.window-maximize', color="#55D6BE"))
+        self.max_btn.setIcon(qta.icon('fa5s.window-maximize', color="#444444"))
         self.max_btn.setIconSize(QSize(20, 20))
         self.max_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.max_btn.clicked.connect(self.maxButton)
 
         self.close_btn.setStyleSheet("width: 30px; height:20px; border: none;")
-        self.close_btn.setIcon(qta.icon('fa5s.times', color="#55D6BE"))
+        self.close_btn.setIcon(qta.icon('fa5s.times', color="#444444"))
         self.close_btn.setIconSize(QSize(20, 20))
         self.close_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.close_btn.clicked.connect(self.closeButton)
@@ -150,81 +144,41 @@ class App(QMainWindow):
 
         self.show()
 
-    def fontMenu(self):
-        dlg = QDialog(self)
-        dlg.setWindowTitle("Font")
-        dlgLayout = QVBoxLayout(self)
-        dlg.setLayout(dlgLayout)
-        fontFrame = QFrame(self)
-        dlgLayout.addWidget(fontFrame)
-        fontLayout = QHBoxLayout(self)
-        fontFrame.setLayout(fontLayout)
-        with open('font.json', 'r') as f:
-            fonts = json.load(f)
-            f.close()
+    def openFile(self):
+        file, check = QFileDialog.getOpenFileName(self, 'Open file',
+                                            os.path.join(os.path.expanduser('~'), 'Documents'), "Text files (*.txt);;All Files (*)")
+        if check:
+            with open(file, 'r') as f:
+                self.textEdit.setPlainText(f.read())
 
-        fontList = QListWidget(self)
-        fontList.setStyleSheet("background:#eeeeee;")
-        for font in fonts:
-            item = QListWidgetItem(font)
-            itemFont = QFont(font, 12)
-            itemFont.setBold(True)
-            item.setFont(itemFont)
-            fontList.addItem(item)
-        fontLayout.addWidget(fontList)
+    def save(self):
+        if self.currentFile:
+            with open(self.currentFile, 'w') as f:
+                f.write(self.textEdit.toPlainText())
+        else:
+            file, check = QFileDialog.getSaveFileName(self, "QFileDialog.getSaveFileName()",
+                                                      "", "Text Files (*.txt);;All Files (*)")
+            if check:
+                with open(file, 'w') as f:
+                    f.write(self.textEdit.toPlainText())
+                self.currentFile = file
 
-        styleList = QListWidget(self)
-        styleList.setFixedWidth(100)
-        styleList.setStyleSheet("background: #eeeeee;")
-        styleList.addItem(QListWidgetItem("Bold"))
-        styleList.addItem(QListWidgetItem("Italic"))
-        styleList.addItem(QListWidgetItem("Bold Italic"))
-        fontLayout.addWidget(styleList)
+    def saveAs(self):
+        file, check = QFileDialog.getSaveFileName(self, "QFileDialog.getSaveFileName()",
+                                                  "", "Text Files (*.txt);;All Files (*)")
+        if check:
+            with open(file, 'w') as f:
+                f.write(self.textEdit.toPlainText())
 
-        sizeList = QListWidget(self)
-        sizeList.setFixedWidth(50)
-        sizeList.setStyleSheet("background:#eeeeee;")
-        for i in range(100):
-            item = QListWidgetItem(str(i+1))
-            sizeList.addItem(item)
-        fontLayout.addWidget(sizeList)
-
-        sampleFrame = QFrame(self)
-        dlgLayout.addWidget(sampleFrame)
-        sampleLayout = QHBoxLayout(self)
-        sampleFrame.setLayout(sampleLayout)
-
-        sampleBox = QGroupBox("Sample Text")
-        sampleBox.setStyleSheet("padding:20px;")
-        sampleBox.setFixedWidth(200)
-        sampleBox.setFixedHeight(100)
-        sampleLayout.addWidget(sampleBox)
-        sampleBoxLayout = QHBoxLayout(self)
-        sampleBox.setLayout(sampleBoxLayout)
-        sample = QLabel("AaBbYyZz")
-        sample.setStyleSheet("padding:20px; line-height:20px;")
-        sampleBoxLayout.addWidget(sample)
-
-        okBtn = QPushButton("Ok")
-        okBtn.clicked.connect(dlg.close())
-        sampleLayout.addWidget(okBtn)
-
-        cancelBtn = QPushButton("Cancel")
-        cancelBtn.clicked.connect(dlg.close())
-        sampleLayout.addWidget(cancelBtn)
-
-        dlg.exec_()
+    def print(self):
+        dialog = QPrintDialog()
+        if dialog.exec_() == QDialog.Accepted:
+            self.textEdit.document().print_(dialog.printer())
 
     def openFont(self):
-        self.fontMenu()
-
-    def openFile(self):
-        fname = QFileDialog.getOpenFileName(self, 'Open file',
-                                            os.path.join(os.path.expanduser('~'), 'Documents'), "Text files (*.txt)")
-        with open(fname[0], 'r') as f:
-            file = f.read()
-            self.textEdit.setPlainText(file)
-            f.close()
+        font, ok = QFontDialog.getFont(self)
+        if ok:
+            self.textEdit.setFont(font)
 
     def mousePressEvent(self, event):
         self.oldPos = event.globalPos()
@@ -247,9 +201,9 @@ class App(QMainWindow):
     @pyqtSlot()
     def maxButton(self):
         if self.fullScreen:
-            self.winX = int((self.screen.size().width() / 2) - (640 / 2))
-            self.winY = int((self.screen.size().height() / 2) - (480 / 2))
-            self.setGeometry(self.winX, self.winY, 640, 480)
+            self.winX = int((self.screen.size().width() / 2) - (self.defaultWidth / 2))
+            self.winY = int((self.screen.size().height() / 2) - (self.defaultHeight / 2))
+            self.setGeometry(self.winX, self.winY, self.defaultWidth, self.defaultHeight)
             self.fullScreen = False
 
         else:
